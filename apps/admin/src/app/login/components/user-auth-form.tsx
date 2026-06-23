@@ -122,7 +122,7 @@ function TryComponents({ isLoading, setIsLoading, setFetchedOTP }) {
       try {
          setIsLoading(true)
 
-         if (!process.env.JWT_SECRET_KEY) {
+         if (false) {
             console.error('JWT secret key is missing')
             setIsLoading(false)
             return
@@ -148,7 +148,7 @@ function TryComponents({ isLoading, setIsLoading, setFetchedOTP }) {
       try {
          setIsLoading(true)
 
-         if (!process.env.JWT_SECRET_KEY) {
+         if (false) {
             console.error('JWT secret key is missing')
             setIsLoading(false)
             return

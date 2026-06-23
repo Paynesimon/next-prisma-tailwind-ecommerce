@@ -1,19 +1,21 @@
+import { GeoJsonLd } from '@/components/native/GeoJsonLd'
 import { ModalProvider } from '@/providers/modal-provider'
 import { ThemeProvider } from '@/providers/theme-provider'
 import { ToastProvider } from '@/providers/toast-provider'
 import { Inter } from 'next/font/google'
+import { config } from '@/lib/config'
 
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-   title: 'Store',
-   description: 'E-Commerce Store',
-   keywords: ['E-Commerce', 'Store', 'Shop'],
-   authors: [{ name: 'Sesto', url: 'https://github.com/sesto-dev' }],
-   creator: 'Sesto',
-   publisher: 'Sesto',
+   title: config.store.name,
+   description: config.store.description,
+   keywords: config.store.keywords,
+   authors: [{ name: config.store.creator }],
+   creator: config.store.creator,
+   publisher: config.store.creator,
 }
 
 export default async function RootLayout({
@@ -24,6 +26,7 @@ export default async function RootLayout({
    return (
       <html lang="en">
          <body className={inter.className}>
+            <GeoJsonLd />
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                <ToastProvider />
                <ModalProvider />

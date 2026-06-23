@@ -6,11 +6,13 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { useAuthenticated } from '@/hooks/useAuthentication'
 import { isVariableValid } from '@/lib/utils'
 import { useCartContext } from '@/state/Cart'
-import Link from 'next/link'
+import { useState } from 'react'
 
 export function Receipt() {
    const { authenticated } = useAuthenticated()
-   const { loading, cart, refreshCart, dispatchCart } = useCartContext()
+   const { loading, cart } = useCartContext()
+   const [checkoutLoading, setCheckoutLoading] = useState(false)
+   const [error, setError] = useState('')
 
    function calculatePayableCost() {
       let totalAmount = 0,
@@ -36,8 +38,53 @@ export function Receipt() {
       }
    }
 
+   async function handleCheckout() {
+      if (!authenticated) {
+         window.location.href = '/login'
+         return
+      }
+
+      try {
+         setCheckoutLoading(true)
+         setError('')
+
+         // 构建购物车商品列表
+         const items = cart?.items?.map((item: any) => ({
+            title: item?.product?.title,
+            price: item?.product?.price,
+            quantity: item?.count,
+            images: item?.product?.images || [],
+            description: item?.product?.description || '',
+         }))
+
+         const response = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items }),
+         })
+
+         const data = await response.json()
+
+         if (!response.ok) {
+            setError(data.error || '支付失败，请重试')
+            return
+         }
+
+         // 跳转到 Stripe 支付页面
+         if (data.url) {
+            window.location.href = data.url
+         }
+      } catch (err) {
+         setError('网络错误，请重试')
+      } finally {
+         setCheckoutLoading(false)
+      }
+   }
+
+   const cartEmpty = !isVariableValid(cart?.items) || cart?.items?.length === 0
+
    return (
-      <Card className={loading && 'animate-pulse'}>
+      <Card className={loading ? 'animate-pulse' : ''}>
          <CardHeader className="p-4 pb-0">
             <h2 className="font-bold tracking-tight">Receipt</h2>
          </CardHeader>
@@ -61,22 +108,19 @@ export function Receipt() {
                <p>Payable Amount</p>
                <h3>${calculatePayableCost().payableAmount}</h3>
             </div>
+            {error && (
+               <p className="text-red-500 text-sm mt-2">{error}</p>
+            )}
          </CardContent>
          <Separator />
          <CardFooter>
-            <Link
-               href={authenticated ? '/checkout' : '/login'}
+            <Button
+               disabled={cartEmpty || checkoutLoading}
                className="w-full"
+               onClick={handleCheckout}
             >
-               <Button
-                  disabled={
-                     !isVariableValid(cart?.items) || cart['items'].length === 0
-                  }
-                  className="w-full"
-               >
-                  Checkout
-               </Button>
-            </Link>
+               {checkoutLoading ? '处理中...' : 'Checkout'}
+            </Button>
          </CardFooter>
       </Card>
    )

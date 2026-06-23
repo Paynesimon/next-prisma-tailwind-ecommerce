@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>客户开站资料清单</title>
+  <style>
+    @page { size: A4; margin: 10mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      font-size: 7.5pt;
+      line-height: 1.25;
+      color: #1a1a1a;
+      padding: 0;
+    }
+    h1 {
+      font-size: 14pt;
+      text-align: center;
+      margin-bottom: 4px;
+      color: #111;
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 4px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 7pt;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 10px;
+    }
+    section { break-inside: avoid; }
+    h2 {
+      font-size: 8.5pt;
+      color: #2563eb;
+      margin-bottom: 2px;
+      border-left: 3px solid #2563eb;
+      padding-left: 4px;
+    }
+    h3 {
+      font-size: 7.5pt;
+      color: #444;
+      margin: 2px 0 1px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 3px;
+      font-size: 7pt;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 1px 3px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f0f4ff; font-weight: 600; }
+    .req { color: #b91c1c; font-weight: 600; }
+    .opt { color: #666; }
+    .auto { color: #059669; }
+    .note {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      padding: 3px 5px;
+      font-size: 6.5pt;
+      margin: 2px 0;
+      border-radius: 2px;
+    }
+    .checklist {
+      columns: 2;
+      font-size: 7pt;
+      list-style: none;
+    }
+    .checklist li::before { content: "☐ "; }
+    .flow {
+      font-size: 6.5pt;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 3px 5px;
+      margin-top: 2px;
+    }
+    .flow ol { padding-left: 14px; }
+    .footer {
+      margin-top: 4px;
+      font-size: 6pt;
+      color: #888;
+      text-align: center;
+      border-top: 1px solid #ddd;
+      padding-top: 3px;
+    }
+    .full { grid-column: 1 / -1; }
+    .mini th, .mini td { padding: 1px 2px; }
+  </style>
+</head>
+<body>
+  <h1>客户开站资料清单</h1>
+  <p class="subtitle">按飞书四张表整理 · 必填 / 选填 / 系统自动生成 / 建站后填写</p>
+
+  <div class="grid">
+    <section>
+      <h2>一、开站前确认</h2>
+      <table class="mini">
+        <tr><th>项目</th><th>要求</th><th>示例</th></tr>
+        <tr><td class="req">客户 ID</td><td>必填，全局唯一，英文小写</td><td>client001</td></tr>
+        <tr><td class="req">店铺名称</td><td>必填</td><td>TechGear Store</td></tr>
+        <tr><td class="req">管理员邮箱</td><td>必填，后台 OTP 登录</td><td>admin@example.com</td></tr>
+        <tr><td class="opt">联系邮箱</td><td>建议填</td><td>展示在联系页</td></tr>
+        <tr><td class="req">至少 1 个商品</td><td>名称、价格、图片</td><td>—</td></tr>
+        <tr><td class="opt">自定义域名</td><td>选填，建站自动绑 Vercel</td><td>shop.example.com</td></tr>
+      </table>
+      <p class="note">客户 ID 确定后勿改，用于数据库、GitHub 仓库、Vercel 项目命名。</p>
+    </section>
+
+    <section>
+      <h2>二、店铺信息表</h2>
+      <h3>客户必填</h3>
+      <table class="mini">
+        <tr><th>字段</th><th>说明</th></tr>
+        <tr><td>客户ID</td><td>唯一标识 client003</td></tr>
+        <tr><td>店铺名称</td><td>网站标题</td></tr>
+        <tr><td>店铺简介</td><td>首页/SEO 描述</td></tr>
+        <tr><td>管理员邮箱</td><td>后台登录</td></tr>
+      </table>
+      <h3>建议填写</h3>
+      <table class="mini">
+        <tr><td>关键词</td><td>逗号分隔，SEO 用</td></tr>
+        <tr><td>联系邮箱 / 创建者</td><td>客服与品牌名</td></tr>
+        <tr><td>自定义域名</td><td>需客户能改 DNS</td></tr>
+      </table>
+      <h3 class="auto">系统自动回写（勿手填）</h3>
+      <p style="font-size:6.5pt">前台/后台地址、部署状态、Sitemap、Google/Bing收录、SEO待办、DNS说明</p>
+    </section>
+
+    <section>
+      <h2>三、商品表</h2>
+      <p style="font-size:6.5pt;margin-bottom:2px">每件商品一行，<strong>客户ID 须与店铺表一致</strong></p>
+      <table class="mini">
+        <tr><th>字段</th><th>说明</th></tr>
+        <tr><td class="req">客户ID</td><td>归属客户</td></tr>
+        <tr><td class="req">商品名称</td><td>改名=新商品</td></tr>
+        <tr><td class="req">价格</td><td>数字</td></tr>
+        <tr><td class="req">图片URL</td><td>HTTPS 公网图链</td></tr>
+        <tr><td class="opt">品牌/分类/描述/关键词</td><td>描述可 AI 生成</td></tr>
+        <tr><td class="opt">是否上架</td><td>默认上架</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>四、Banner 表（选填）</h2>
+      <table class="mini">
+        <tr><th>字段</th><th>说明</th></tr>
+        <tr><td>客户ID</td><td>必填（若做轮播）</td></tr>
+        <tr><td>图片URL / 标签名 / 排序</td><td>数字越小越靠前</td></tr>
+      </table>
+      <p style="font-size:6.5pt">无 Banner 时用默认轮播。</p>
+
+      <h2 style="margin-top:4px">五、支付配置表（选填）</h2>
+      <table class="mini">
+        <tr><th>字段</th><th>说明</th></tr>
+        <tr><td>客户ID</td><td>必填</td></tr>
+        <tr><td>Stripe 公钥/私钥</td><td>pk_... / sk_...</td></tr>
+        <tr><td>PayPal Client ID</td><td>若用 PayPal</td></tr>
+      </table>
+      <p style="font-size:6.5pt">不填可浏览，支付不可用。上线后需配 Stripe Webhook。</p>
+    </section>
+
+    <section class="full">
+      <h2>六、客户素材汇总 &amp; 最小配置</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <ul class="checklist">
+          <li>客户 ID（英文，唯一）</li>
+          <li>店铺名称 + 简介</li>
+          <li>管理员邮箱（能收验证码）</li>
+          <li>商品清单（名称、价格、图片）</li>
+          <li>Logo / Banner 图（HTTPS）</li>
+          <li>自定义域名（可选）</li>
+          <li>Stripe 密钥（若要收款）</li>
+          <li>社交媒体链接（可选）</li>
+        </ul>
+        <div>
+          <h3>最小可建站（快速测试）</h3>
+          <table class="mini">
+            <tr><th>表</th><th>最少字段</th></tr>
+            <tr><td>店铺表</td><td>客户ID、店铺名称、店铺简介、管理员邮箱</td></tr>
+            <tr><td>商品表</td><td>客户ID、商品名称、价格、图片URL（≥1条）</td></tr>
+          </table>
+          <p class="note" style="margin-top:3px">图片须 https:// 公网链接，勿用本地路径。改商品用 sync；改店名等需 build 重新部署。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>七、建站流程</h2>
+      <div class="flow">
+        <ol>
+          <li>飞书填好店铺 + 商品（+ 支付，可选）</li>
+          <li>触发一键建站（action: build）</li>
+          <li>等待约 20–30 分钟</li>
+          <li>飞书自动回写前台/后台地址</li>
+          <li>有域名 → 按 DNS 说明解析</li>
+          <li>点「Google收录」提交 sitemap</li>
+          <li>日常改商品 → 自动 sync（约 1 分钟）</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>八、建站后手动步骤</h2>
+      <table class="mini">
+        <tr><th>步骤</th><th>谁做</th><th>说明</th></tr>
+        <tr><td>DNS 解析</td><td>客户</td><td>按飞书 DNS 说明</td></tr>
+        <tr><td>Google 收录</td><td>客户/运营</td><td>Search Console 提交 sitemap.xml</td></tr>
+        <tr><td>Stripe Webhook</td><td>运营</td><td>配置支付回调</td></tr>
+        <tr><td>后台首次登录</td><td>客户</td><td>管理员邮箱收 OTP</td></tr>
+      </table>
+      <h3 style="margin-top:3px">运营侧（客户无需提供）</h3>
+      <p style="font-size:6.5pt">GitHub / Vercel / Neon / 飞书密钥、Railway Webhook、SMTP、JWT、AI 文案密钥</p>
+    </section>
+  </div>
+
+  <p class="footer">MyShop 自动化建站 · 客户开站资料清单 · 2025</p>
+</body>
+</html>

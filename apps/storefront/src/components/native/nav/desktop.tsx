@@ -9,26 +9,17 @@ import {
    NavigationMenuTrigger,
    navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu'
-import config from '@/config/site'
 import { cn } from '@/lib/utils'
+import { config } from '@/lib/config'
 import Link from 'next/link'
-import { forwardRef } from 'react'
-
-const components: { title: string; href: string; description: string }[] = [
-   {
-      title: 'Alert Dialog',
-      href: '/docs/primitives/alert-dialog',
-      description:
-         'A modal dialog that interrupts the user with important content and expects a response.',
-   },
-]
+import { forwardRef, useEffect, useState } from 'react'
 
 export function MainNav() {
    return (
       <div className="hidden md:flex gap-4">
          <Link href="/" className="flex items-center">
             <span className="hidden font-medium sm:inline-block">
-               {config.name}
+               {config.store.name}
             </span>
          </Link>
          <NavMenu />
@@ -37,6 +28,14 @@ export function MainNav() {
 }
 
 export function NavMenu() {
+   const [categories, setCategories] = useState([])
+   const [brands, setBrands] = useState([])
+
+   useEffect(() => {
+      fetch('/api/categories').then(r => r.json()).then(setCategories).catch(() => [])
+      fetch('/api/brands').then(r => r.json()).then(setBrands).catch(() => [])
+   }, [])
+
    return (
       <NavigationMenu>
          <NavigationMenuList>
@@ -49,6 +48,7 @@ export function NavMenu() {
                   </NavigationMenuLink>
                </Link>
             </NavigationMenuItem>
+
             <NavigationMenuItem>
                <NavigationMenuTrigger>
                   <div className="font-normal text-foreground/70">
@@ -56,54 +56,47 @@ export function NavMenu() {
                   </div>
                </NavigationMenuTrigger>
                <NavigationMenuContent>
-                  <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                     <li className="row-span-3">
-                        <NavigationMenuLink asChild>
-                           <Link
-                              className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                              href="/"
+                  <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-2">
+                     {categories.length > 0 ? (
+                        categories.map((category: any) => (
+                           <ListItem
+                              key={category.id}
+                              href={`/products?category=${category.title}`}
+                              title={category.title}
                            >
-                              <div className="mb-2 mt-4 text-lg font-medium">
-                                 shadcn/ui
-                              </div>
-                              <p className="text-sm leading-tight text-muted-foreground">
-                                 Beautifully designed components built with
-                                 Radix UI and Tailwind CSS.
-                              </p>
-                           </Link>
-                        </NavigationMenuLink>
-                     </li>
-                     <ListItem href="/docs" title="Introduction">
-                        Re-usable components built using Radix UI and Tailwind
-                        CSS.
-                     </ListItem>
-                     <ListItem href="/docs/installation" title="Installation">
-                        How to install dependencies and structure your app.
-                     </ListItem>
-                     <ListItem
-                        href="/docs/primitives/typography"
-                        title="Typography"
-                     >
-                        Styles for headings, paragraphs, lists...etc
-                     </ListItem>
+                              {category.description || `Browse ${category.title} products`}
+                           </ListItem>
+                        ))
+                     ) : (
+                        <li className="p-4 text-sm text-muted-foreground">
+                           No categories yet
+                        </li>
+                     )}
                   </ul>
                </NavigationMenuContent>
             </NavigationMenuItem>
+
             <NavigationMenuItem>
                <NavigationMenuTrigger>
                   <div className="font-normal text-foreground/70">Brands</div>
                </NavigationMenuTrigger>
                <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                     {components.map((component) => (
-                        <ListItem
-                           key={component.title}
-                           title={component.title}
-                           href={component.href}
-                        >
-                           {component.description}
-                        </ListItem>
-                     ))}
+                  <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                     {brands.length > 0 ? (
+                        brands.map((brand: any) => (
+                           <ListItem
+                              key={brand.id}
+                              href={`/products?brand=${brand.title}`}
+                              title={brand.title}
+                           >
+                              {brand.description || `Browse ${brand.title} products`}
+                           </ListItem>
+                        ))
+                     ) : (
+                        <li className="p-4 text-sm text-muted-foreground">
+                           No brands yet
+                        </li>
+                     )}
                   </ul>
                </NavigationMenuContent>
             </NavigationMenuItem>

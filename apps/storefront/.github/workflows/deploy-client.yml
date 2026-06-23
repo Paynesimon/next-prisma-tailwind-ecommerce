@@ -1,0 +1,62 @@
+# 参考 workflow，实际部署请在 myshop-builder 仓库运行 build.yml
+
+name: Deploy Client Site
+
+on:
+  workflow_dispatch:
+    inputs:
+      client_id:
+        description: '客户 ID，例如 client001'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      # 飞书
+      FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+      FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+      FEISHU_APP_TOKEN: ${{ secrets.FEISHU_APP_TOKEN }}
+      # Neon
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_ORG_ID: ${{ secrets.NEON_ORG_ID }}
+      # GitHub（必须用 PAT，不能用内置 GITHUB_TOKEN）
+      GH_PAT: ${{ secrets.GH_PAT }}
+      GH_USERNAME: ${{ secrets.GH_USERNAME }}
+      # Vercel
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      # 邮件 / 鉴权
+      MAIL_SMTP_USER: ${{ secrets.MAIL_SMTP_USER }}
+      MAIL_SMTP_PASS: ${{ secrets.MAIL_SMTP_PASS }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      # AI 文案（可选）
+      ARK_API_KEY: ${{ secrets.ARK_API_KEY }}
+
+    steps:
+      - name: Checkout storefront template
+        uses: actions/checkout@v4
+        with:
+          repository: Paynesimon/template-ecommerce
+          path: storefront
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Checkout admin template
+        uses: actions/checkout@v4
+        with:
+          repository: Paynesimon/template-admin
+          path: admin
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install storefront dependencies
+        working-directory: storefront
+        run: npm install --legacy-peer-deps
+
+      - name: Install admin dependencies
+        working-directory: admin
+        run: npm install --legacy-peer-deps
+
+      - name: Run main.js
+        working-directory: storefront
+        run: node main.js ${{ inputs.client_id }}

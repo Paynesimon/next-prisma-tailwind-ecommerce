@@ -1,5 +1,4 @@
 import {
-   BlogPostCard,
    BlogPostGrid,
    BlogPostSkeletonGrid,
 } from '@/components/native/BlogCard'
@@ -8,6 +7,7 @@ import { ProductGrid, ProductSkeletonGrid } from '@/components/native/Product'
 import { Heading } from '@/components/native/heading'
 import { Separator } from '@/components/native/separator'
 import prisma from '@/lib/prisma'
+import { config } from '@/lib/config'
 import { isVariableValid } from '@/lib/utils'
 
 export default async function Index() {
@@ -23,15 +23,18 @@ export default async function Index() {
       take: 3,
    })
 
-   const banners = await prisma.banner.findMany()
+   const dbBanners = await prisma.banner.findMany()
+   const bannerImages = isVariableValid(dbBanners)
+      ? dbBanners.map((obj) => obj.image)
+      : config.banners.map((b: any) => b.image)
 
    return (
       <div className="flex flex-col border-neutral-200 dark:border-neutral-700">
-         <Carousel images={banners.map((obj) => obj.image)} />
+         <Carousel images={bannerImages} />
          <Separator className="my-8" />
          <Heading
-            title="Products"
-            description="Below is a list of products we have available for you."
+            title={config.store.name}
+            description={config.store.tagline}
          />
          {isVariableValid(products) ? (
             <ProductGrid products={products} />

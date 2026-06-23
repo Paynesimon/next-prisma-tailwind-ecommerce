@@ -1,6 +1,8 @@
 import prisma from '@/lib/prisma'
 
-const URL = process.env.NEXT_PUBLIC_URL
+export const dynamic = 'force-dynamic'
+
+const URL = process.env.NEXT_PUBLIC_SITE_URL
 
 export default async function sitemap() {
    const products = (await prisma.product.findMany()).map(

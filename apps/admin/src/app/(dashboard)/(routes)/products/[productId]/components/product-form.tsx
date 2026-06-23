@@ -96,13 +96,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
          if (initialData) {
             await fetch(`/api/products/${params.productId}`, {
                method: 'PATCH',
-               body: JSON.stringify(data),
+               body: JSON.stringify({ data }),
                cache: 'no-store',
             })
          } else {
             await fetch(`/api/products`, {
                method: 'POST',
-               body: JSON.stringify(data),
+               body: JSON.stringify({ data }),
                cache: 'no-store',
             })
          }
@@ -175,7 +175,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                               value={field.value.map((image) => image)}
                               disabled={loading}
                               onChange={(url) =>
-                                 field.onChange([...field.value, { url }])
+                                 field.onChange([...field.value, url])
                               }
                               onRemove={(url) =>
                                  field.onChange([

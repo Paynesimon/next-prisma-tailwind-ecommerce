@@ -26,6 +26,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
    }, [])
 
    const onUpload = (result: any) => {
+      console.log("上传结果:", JSON.stringify(result.info));
       onChange(result.info.secure_url)
    }
 
@@ -61,7 +62,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                </div>
             ))}
          </div>
-         <CldUploadWidget onUpload={onUpload} uploadPreset="t4drjppf">
+         <CldUploadWidget onSuccess={onUpload} uploadPreset="t4drjppf">
             {({ open }) => {
                const onClick = () => {
                   open()

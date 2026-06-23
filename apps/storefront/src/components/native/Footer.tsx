@@ -1,50 +1,30 @@
+// src/components/native/Footer.tsx
 import { Separator } from '@/components/native/separator'
-import config from '@/config/site'
-import { GithubIcon, InstagramIcon, TwitterIcon } from 'lucide-react'
+import { config } from '@/lib/config'
+import { FacebookIcon, InstagramIcon, LinkedinIcon, TwitterIcon } from 'lucide-react'
 import Link from 'next/link'
 
 const data = [
    {
       label: 'LEGAL',
       links: [
-         {
-            label: 'Privacy Policy',
-            url: '/privacy',
-         },
-         {
-            label: 'Terms & Conditions',
-            url: '/terms',
-         },
+         { label: 'Privacy Policy', url: '/privacy' },
+         { label: 'Terms & Conditions', url: '/terms' },
       ],
    },
    {
       label: 'RESOURCES',
       links: [
-         {
-            label: 'Blog',
-            url: '/blog',
-         },
-         {
-            label: 'About',
-            url: '/about',
-         },
-         {
-            label: 'Contact',
-            url: '/contact',
-         },
+         { label: 'Blog', url: '/blog' },
+         { label: 'About', url: '/about' },
+         { label: 'Contact', url: '/contact' },
       ],
    },
    {
       label: 'SUPPORT',
       links: [
-         {
-            label: 'Telegram',
-            url: '/telegram',
-         },
-         {
-            label: 'FAQ',
-            url: '/faq',
-         },
+         { label: 'Telegram', url: '/telegram' },
+         { label: 'FAQ', url: '/faq' },
       ],
    },
 ]
@@ -92,11 +72,10 @@ function Trademark() {
       <div className="mb-6 hidden md:mb-0 md:block">
          <span className="flex flex-col">
             <h2 className="whitespace-nowrap text-sm font-semibold uppercase">
-               {config.name}
+               {config.store.name}
             </h2>
             <span className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-               © {new Date().getFullYear()} {config.name}™ . All Rights
-               Reserved.
+               © {new Date().getFullYear()} {config.store.name}™ . All Rights Reserved.
             </span>
          </span>
       </div>
@@ -104,32 +83,27 @@ function Trademark() {
 }
 
 function Socials() {
+   const { instagramLink, twitterLink, facebookLink, linkedinLink, tiktokLink, telegramLink } = config.store
+
+   const socials = [
+      { url: instagramLink, icon: <InstagramIcon className="h-4" />, label: 'Instagram' },
+      { url: twitterLink, icon: <TwitterIcon className="h-4" />, label: 'Twitter' },
+      { url: facebookLink, icon: <FacebookIcon className="h-4" />, label: 'Facebook' },
+      { url: linkedinLink, icon: <LinkedinIcon className="h-4" />, label: 'LinkedIn' },
+      { url: tiktokLink, icon: <span className="text-xs font-bold">TikTok</span>, label: 'TikTok' },
+      { url: telegramLink, icon: <span className="text-xs font-bold">TG</span>, label: 'Telegram' },
+   ].filter(s => s.url)
+
+   if (socials.length === 0) return <div className="mb-6" />
+
    return (
       <div className="mb-6 flex justify-center space-x-6 text-muted-foreground">
-         <a
-            href="https://instagram.com/sesto_dev"
-            target="_blank"
-            rel="noreferrer"
-         >
-            <InstagramIcon className="h-4" />
-            <span className="sr-only">Instagram page</span>
-         </a>
-         <a
-            href="https://twitter.com/sesto_dev"
-            target="_blank"
-            rel="noreferrer"
-         >
-            <TwitterIcon className="h-4" />
-            <span className="sr-only">Twitter page</span>
-         </a>
-         <a
-            href="https://github.com/sesto-dev"
-            target="_blank"
-            rel="noreferrer"
-         >
-            <GithubIcon className="h-4" />
-            <span className="sr-only">GitHub account</span>
-         </a>
+         {socials.map(({ url, icon, label }) => (
+            <a key={label} href={url} target="_blank" rel="noreferrer">
+               {icon}
+               <span className="sr-only">{label}</span>
+            </a>
+         ))}
       </div>
    )
 }
