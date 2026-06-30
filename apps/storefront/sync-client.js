@@ -60,27 +60,8 @@ function recordsForClient(items, clientId) {
    return items.filter((r) => String(r.fields['客户ID'] || '').trim() === clientId)
 }
 
-function mapProductRecord(r) {
-   const f = r.fields
-   return {
-      title: f['商品名称'] || '',
-      brand: f['品牌'] || '',
-      price: parseFloat(f['价格']) || 0,
-      description: f['商品描述'] || '',
-      images: [f['图片URL'] || ''],
-      categories: f['分类'] ? f['分类'].split(',').map((c) => c.trim()) : [],
-      keywords: f['关键词'] ? f['关键词'].split(',').map((k) => k.trim()) : [],
-      isAvailable: f['是否上架'] ?? true,
-   }
-}
-
-function mapBannerRecord(r) {
-   return {
-      image: r.fields['图片URL'] || '',
-      label: r.fields['标签名'] || '',
-      order: r.fields['排序'] || 0,
-   }
-}
+const { mapProductRecord } = require('./feishu-product')
+const { bannerRecordsForClient, syncBannersToDb } = require('./feishu-banner')
 
 async function syncDatabase(products, banners, connectionString) {
    process.env.DATABASE_URL = connectionString
@@ -88,12 +69,11 @@ async function syncDatabase(products, banners, connectionString) {
    const prisma = new PrismaClient()
    try {
       if (banners.length) {
-         await prisma.banner.deleteMany()
-         for (const b of banners) {
-            if (!b.image) continue
-            await prisma.banner.create({ data: { image: b.image, label: b.label } })
-         }
-         log('✅', `Banner 同步完成：${banners.length} 条`)
+         const stats = await syncBannersToDb(prisma, banners)
+         log(
+            '✅',
+            `Banner 同步完成：${stats.total} 条（首页轮播 ${stats.carousel}，分类封面 ${stats.categoryCovers}）`
+         )
       }
 
       const productTitles = products.map((p) => p.title).filter(Boolean)
@@ -128,6 +108,7 @@ async function syncDatabase(products, banners, connectionString) {
                   images: p.images,
                   keywords: p.keywords,
                   isAvailable: p.isAvailable,
+                  metadata: p.metadata ?? undefined,
                   brandId: brand.id,
                   categories: { set: [{ title: categoryTitle }] },
                },
@@ -142,6 +123,7 @@ async function syncDatabase(products, banners, connectionString) {
                   images: p.images,
                   keywords: p.keywords,
                   isAvailable: p.isAvailable,
+                  metadata: p.metadata ?? undefined,
                   stock: 10,
                   discount: 0,
                   brand: { connect: { id: brand.id } },
@@ -173,9 +155,9 @@ async function syncClient(clientId) {
    if (!storeItem) throw new Error(`飞书里找不到客户ID为 "${clientId}" 的店铺`)
 
    const products = recordsForClient(productItems, clientId).map(mapProductRecord)
-   const banners = recordsForClient(bannerItems, clientId).map(mapBannerRecord)
+   const banners = bannerRecordsForClient(bannerItems, clientId)
 
-   log('✅', `飞书数据：${products.length} 个商品，${banners.length} 个 Banner`)
+   log('✅', `飞书数据 [${clientId}]：${products.length} 个商品，${banners.length} 个 Banner`)
 
    const connectionString = await getConnectionString(clientId)
    await syncDatabase(products, banners, connectionString)

@@ -1,7 +1,11 @@
 import Carousel from '@/components/native/Carousel'
 import { JsonLd } from '@/components/native/JsonLd'
+import { ProductReviews } from '@/components/feedback/ProductReviews'
+import { isFeatureEnabled } from '@/lib/features'
 import { getLocale } from '@/lib/locale'
 import prisma from '@/lib/prisma'
+import { getSoldCount } from '@/lib/product-stats'
+import { getTheme } from '@/lib/theme'
 import { isVariableValid } from '@/lib/utils'
 import { ChevronRightIcon } from 'lucide-react'
 import type { Metadata, ResolvingMetadata } from 'next'
@@ -58,6 +62,9 @@ export default async function Product({
       notFound()
    }
 
+   const soldCount = await getSoldCount(product.id)
+   const theme = getTheme()
+
    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
    const { currency } = getLocale()
    const jsonLd = {
@@ -87,8 +94,11 @@ export default async function Product({
          <Breadcrumbs product={product} />
          <div className="mt-6 grid grid-cols-1 gap-2 md:grid-cols-3">
             <ImageColumn product={product} />
-            <DataSection product={product} />
+            <DataSection product={product} soldCount={soldCount} />
          </div>
+         {isFeatureEnabled('productReviews') ? (
+            <ProductReviews productId={product.id} theme={theme} />
+         ) : null}
       </>
    )
 }

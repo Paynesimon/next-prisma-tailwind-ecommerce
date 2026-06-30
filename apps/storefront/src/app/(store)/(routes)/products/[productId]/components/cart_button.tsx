@@ -4,6 +4,11 @@ import { Spinner } from '@/components/native/icons'
 import { Button } from '@/components/ui/button'
 import { useAuthenticated } from '@/hooks/useAuthentication'
 import { getCountInCart, getLocalCart } from '@/lib/cart'
+import {
+   getProductMoq,
+   nextAddCount,
+   nextRemoveCount,
+} from '@/lib/moq'
 import { CartContextProvider, useCartContext } from '@/state/Cart'
 import { MinusIcon, PlusIcon, ShoppingBasketIcon, X } from 'lucide-react'
 import { useState } from 'react'
@@ -39,17 +44,15 @@ export function ButtonComponent({ product }) {
             cartItems: cart?.items,
             productId: product?.id,
          })
+         const moq = getProductMoq(product)
+         const newCount = nextAddCount(count, moq)
 
          if (authenticated) {
             const response = await fetch(`/api/cart`, {
                method: 'POST',
                body: JSON.stringify({
                   productId: product?.id,
-                  count:
-                     getCountInCart({
-                        cartItems: cart?.items,
-                        productId: product?.id,
-                     }) + 1,
+                  count: newCount,
                }),
                cache: 'no-store',
                headers: {
@@ -67,7 +70,7 @@ export function ButtonComponent({ product }) {
          if (!authenticated && count > 0) {
             for (let i = 0; i < localCart.items.length; i++) {
                if (localCart.items[i].productId === product?.id) {
-                  localCart.items[i].count = localCart.items[i].count + 1
+                  localCart.items[i].count = newCount
                }
             }
 
@@ -78,7 +81,7 @@ export function ButtonComponent({ product }) {
             localCart.items.push({
                productId: product?.id,
                product,
-               count: 1,
+               count: moq,
             })
 
             dispatchCart(localCart)
@@ -98,17 +101,15 @@ export function ButtonComponent({ product }) {
             cartItems: cart?.items,
             productId: product?.id,
          })
+         const moq = getProductMoq(product)
+         const newCount = nextRemoveCount(count, moq)
 
          if (authenticated) {
             const response = await fetch(`/api/cart`, {
                method: 'POST',
                body: JSON.stringify({
                   productId: product?.id,
-                  count:
-                     getCountInCart({
-                        cartItems: cart?.items,
-                        productId: product?.id,
-                     }) - 1,
+                  count: newCount,
                }),
                cache: 'no-store',
                headers: {
@@ -124,18 +125,16 @@ export function ButtonComponent({ product }) {
          const localCart = getLocalCart() as any
          const index = findLocalCartIndexById(localCart, product?.id)
 
-         if (!authenticated && count > 1) {
-            for (let i = 0; i < localCart.items.length; i++) {
-               if (localCart.items[i].productId === product?.id) {
-                  localCart.items[i].count = localCart.items[i].count - 1
+         if (!authenticated && count > 0) {
+            if (newCount <= 0) {
+               localCart.items.splice(index, 1)
+            } else {
+               for (let i = 0; i < localCart.items.length; i++) {
+                  if (localCart.items[i].productId === product?.id) {
+                     localCart.items[i].count = newCount
+                  }
                }
             }
-
-            dispatchCart(localCart)
-         }
-
-         if (!authenticated && count === 1) {
-            localCart.items.splice(index, 1)
 
             dispatchCart(localCart)
          }
@@ -157,6 +156,8 @@ export function ButtonComponent({ product }) {
       cartItems: cart?.items,
       productId: product?.id,
    })
+   const moq = getProductMoq(product)
+   const removeClears = nextRemoveCount(count, moq) === 0
 
    if (count === 0) {
       return (
@@ -170,7 +171,7 @@ export function ButtonComponent({ product }) {
       return (
          <>
             <Button variant="outline" size="icon" onClick={onRemoveFromCart}>
-               {count == 1 ? (
+               {removeClears ? (
                   <X className="h-4 w-4" />
                ) : (
                   <MinusIcon className="h-4 w-4" />

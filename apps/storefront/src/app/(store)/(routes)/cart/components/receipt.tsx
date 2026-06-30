@@ -5,11 +5,17 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { useAuthenticated } from '@/hooks/useAuthentication'
 import { formatMoney, getTaxRate } from '@/lib/locale'
+import { getCartMoqIssues } from '@/lib/moq'
+import type { StorefrontTheme } from '@/lib/theme'
+import { cn } from '@/lib/utils'
 import { isVariableValid } from '@/lib/utils'
 import { useCartContext } from '@/state/Cart'
 import { useState } from 'react'
 
-export function Receipt() {
+import { getCartCopy, receiptCardClass } from '@/themes/cart/copy'
+
+export function Receipt({ theme = 'shop' }: { theme?: StorefrontTheme }) {
+   const copy = getCartCopy()
    const { authenticated } = useAuthenticated()
    const { loading, cart } = useCartContext()
    const [checkoutLoading, setCheckoutLoading] = useState(false)
@@ -33,7 +39,6 @@ export function Receipt() {
       return {
          totalAmount: formatMoney(totalAmount),
          discountAmount: formatMoney(discountAmount),
-         afterDiscountAmount: formatMoney(afterDiscountAmount),
          taxAmount: formatMoney(taxAmount),
          payableAmount: formatMoney(payableAmount),
       }
@@ -49,7 +54,6 @@ export function Receipt() {
          setCheckoutLoading(true)
          setError('')
 
-         // 构建购物车商品列表
          const items = cart?.items?.map((item: any) => ({
             title: item?.product?.title,
             price: item?.product?.price,
@@ -67,60 +71,77 @@ export function Receipt() {
          const data = await response.json()
 
          if (!response.ok) {
-            setError(data.error || '支付失败，请重试')
+            setError(data.error || 'Checkout failed')
             return
          }
 
-         // 跳转到 Stripe 支付页面
          if (data.url) {
             window.location.href = data.url
          }
-      } catch (err) {
-         setError('网络错误，请重试')
+      } catch {
+         setError('Network error')
       } finally {
          setCheckoutLoading(false)
       }
    }
 
    const cartEmpty = !isVariableValid(cart?.items) || cart?.items?.length === 0
+   const moqIssues = getCartMoqIssues(cart?.items || [])
+   const costs = calculatePayableCost()
 
    return (
-      <Card className={loading ? 'animate-pulse' : ''}>
+      <Card
+         className={cn(
+            loading ? 'animate-pulse' : '',
+            receiptCardClass(theme),
+            theme === 'blog' && 'mt-6'
+         )}
+      >
          <CardHeader className="p-4 pb-0">
-            <h2 className="font-bold tracking-tight">Receipt</h2>
+            <h2
+               className={cn(
+                  'font-bold tracking-tight',
+                  theme === 'blog' && 'font-serif text-xl',
+                  theme === 'corporate' && 'text-lg font-semibold'
+               )}
+            >
+               {copy.receipt}
+            </h2>
          </CardHeader>
          <CardContent className="p-4 text-sm">
-            <div className="block space-y-[1vh]">
+            <div className="space-y-2">
                <div className="flex justify-between">
-                  <p>Total Amount</p>
-                  <h3>{calculatePayableCost().totalAmount}</h3>
+                  <p>{copy.total}</p>
+                  <p className="font-medium">{costs.totalAmount}</p>
                </div>
                <div className="flex justify-between">
-                  <p>Discount Amount</p>
-                  <h3>{calculatePayableCost().discountAmount}</h3>
+                  <p>{copy.discount}</p>
+                  <p className="font-medium">{costs.discountAmount}</p>
                </div>
                <div className="flex justify-between">
-                  <p>Tax Amount</p>
-                  <h3>{calculatePayableCost().taxAmount}</h3>
+                  <p>{copy.tax}</p>
+                  <p className="font-medium">{costs.taxAmount}</p>
                </div>
             </div>
             <Separator className="my-4" />
-            <div className="flex justify-between">
-               <p>Payable Amount</p>
-               <h3>{calculatePayableCost().payableAmount}</h3>
+            <div className="flex justify-between text-base">
+               <p className="font-medium">{copy.payable}</p>
+               <p className="font-semibold">{costs.payableAmount}</p>
             </div>
-            {error && (
-               <p className="text-red-500 text-sm mt-2">{error}</p>
-            )}
+            {theme === 'corporate' && copy.trustNote ? (
+               <p className="mt-3 text-xs text-muted-foreground">{copy.trustNote}</p>
+            ) : null}
+            {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
          </CardContent>
          <Separator />
-         <CardFooter>
+         <CardFooter className="p-4">
             <Button
-               disabled={cartEmpty || checkoutLoading}
+               disabled={cartEmpty || checkoutLoading || moqIssues.length > 0}
                className="w-full"
+               variant={theme === 'blog' ? 'outline' : 'default'}
                onClick={handleCheckout}
             >
-               {checkoutLoading ? '处理中...' : 'Checkout'}
+               {checkoutLoading ? copy.checkoutLoading : copy.checkout}
             </Button>
          </CardFooter>
       </Card>

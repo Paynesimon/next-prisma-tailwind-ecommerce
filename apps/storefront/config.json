@@ -7,6 +7,12 @@
     "countryCode": "US",
     "taxRate": 0.09
   },
+  "theme": "shop",
+  "features": {
+    "productReviews": true,
+    "blogComments": true,
+    "contactMessages": true
+  },
   "store": {
     "name": "mytest",
     "description": "E-Commerce Store",
@@ -15,6 +21,7 @@
     "creator": "My Shop",
     "keywords": [],
     "contactEmail": "",
+    "whatsappLink": "",
     "telegramLink": "",
     "instagramLink": "",
     "twitterLink": "",

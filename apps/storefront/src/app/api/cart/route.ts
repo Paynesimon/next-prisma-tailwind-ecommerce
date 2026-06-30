@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { getProductMoq, isValidCartQuantity } from '@/lib/moq'
 import { NextResponse } from 'next/server'
 
 export async function GET(req: Request) {
@@ -41,6 +42,25 @@ export async function POST(req: Request) {
       }
 
       const { productId, count } = await req.json()
+
+      if (count > 0) {
+         const product = await prisma.product.findUnique({
+            where: { id: productId },
+            select: { metadata: true },
+         })
+
+         if (!product) {
+            return new NextResponse('Product not found', { status: 404 })
+         }
+
+         const moq = getProductMoq(product)
+         if (!isValidCartQuantity(count, moq)) {
+            return NextResponse.json(
+               { error: 'below_moq', moq, productId },
+               { status: 400 }
+            )
+         }
+      }
 
       if (count < 1) {
          await prisma.cartItem.delete({

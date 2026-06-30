@@ -8,6 +8,7 @@ export interface StoreConfig {
    creator: string
    keywords: string[]
    contactEmail?: string
+   whatsappLink?: string
    telegramLink?: string
    instagramLink?: string
    twitterLink?: string
@@ -26,8 +27,16 @@ export interface LocaleConfig {
    taxRate: number
 }
 
+export interface SiteFeatures {
+   productReviews?: boolean
+   blogComments?: boolean
+   contactMessages?: boolean
+}
+
 export interface Config {
    locale?: LocaleConfig
+   theme?: 'shop' | 'corporate' | 'blog'
+   features?: SiteFeatures
    store: StoreConfig
    products: any[]
    banners: any[]

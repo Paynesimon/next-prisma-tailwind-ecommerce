@@ -92,6 +92,7 @@ export async function getFeishuBanners() {
       const records = await getTableRecords(TABLE_IDS.banners)
       return records
          .sort((a: any, b: any) => (a.fields['排序'] || 0) - (b.fields['排序'] || 0))
+         .filter((record: any) => !String(record.fields['绑定分类'] || '').trim())
          .map((record: any) => ({
             image: record.fields['图片URL'] || '',
             label: record.fields['标签名'] || '',

@@ -77,6 +77,22 @@ export function formatMoney(amount: number): string {
    }
 }
 
+export function formatSoldCount(count: number): string {
+   const lang = getLocale().language
+   const base = lang.split('-')[0]
+
+   const labels: Record<string, (n: number) => string> = {
+      en: (n) => `${n} sold`,
+      zh: (n) => `已售 ${n} 件`,
+      ja: (n) => `${n} 件販売`,
+      ko: (n) => `${n}개 판매`,
+      vi: (n) => `Đã bán ${n}`,
+   }
+
+   const fn = labels[lang] || labels[base] || labels.en
+   return fn(count)
+}
+
 export function toStripeUnitAmount(price: number): number {
    const currency = getLocale().currency
    if (currency === 'JPY' || currency === 'KRW' || currency === 'VND') {

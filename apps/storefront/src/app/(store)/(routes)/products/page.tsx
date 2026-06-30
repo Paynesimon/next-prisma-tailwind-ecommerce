@@ -2,6 +2,9 @@ import { ProductGrid, ProductSkeletonGrid } from '@/components/native/Product'
 import { Heading } from '@/components/native/heading'
 import { Separator } from '@/components/native/separator'
 import prisma from '@/lib/prisma'
+import { getSoldCounts } from '@/lib/product-stats'
+import { getProductRatingSummaries } from '@/lib/product-ratings'
+import { isFeatureEnabled } from '@/lib/features'
 import { isVariableValid } from '@/lib/utils'
 
 import {
@@ -45,6 +48,11 @@ export default async function Products({ searchParams }) {
       },
    })
 
+   const soldCounts = await getSoldCounts(products.map((p) => p.id))
+   const ratingSummaries = isFeatureEnabled('productReviews')
+      ? await getProductRatingSummaries(products.map((p) => p.id))
+      : {}
+
    return (
       <>
          <Heading
@@ -62,7 +70,11 @@ export default async function Products({ searchParams }) {
          </div>
          <Separator />
          {isVariableValid(products) ? (
-            <ProductGrid products={products} />
+            <ProductGrid
+               products={products}
+               soldCounts={soldCounts}
+               ratingSummaries={ratingSummaries}
+            />
          ) : (
             <ProductSkeletonGrid />
          )}

@@ -128,6 +128,9 @@
       <table class="mini">
         <tr><td>关键词</td><td>逗号分隔，SEO 用</td></tr>
         <tr><td>联系邮箱 / 创建者</td><td>客服与品牌名</td></tr>
+        <tr><td>开启商品评价</td><td>是/否，默认是；关闭后隐藏评价与卡片评分</td></tr>
+        <tr><td>开启博客评论</td><td>是/否，默认是</td></tr>
+        <tr><td>开启联系留言</td><td>是/否，默认是；关闭后仅显示邮箱/WhatsApp</td></tr>
         <tr><td>自定义域名</td><td>需客户能改 DNS</td></tr>
       </table>
       <h3 class="auto">系统自动回写（勿手填）</h3>
@@ -152,10 +155,13 @@
       <h2>四、Banner 表（选填）</h2>
       <table class="mini">
         <tr><th>字段</th><th>说明</th></tr>
-        <tr><td>客户ID</td><td>必填（若做轮播）</td></tr>
-        <tr><td>图片URL / 标签名 / 排序</td><td>数字越小越靠前</td></tr>
+        <tr><td class="req">客户ID</td><td>每行必填，须与店铺/商品表一致（多客户共用表时用于隔离）</td></tr>
+        <tr><td>图片URL</td><td>HTTPS 公网图链</td></tr>
+        <tr><td>标签名</td><td>选填，内部备注</td></tr>
+        <tr><td>排序</td><td>数字越小越靠前</td></tr>
+        <tr><td class="opt">绑定分类</td><td>留空=首页轮播；填写=该分类卡片封面（须与商品「分类」一致）</td></tr>
       </table>
-      <p style="font-size:6.5pt">无 Banner 时用默认轮播。</p>
+      <p style="font-size:6.5pt">无 Banner 时用渐变 Hero。分类无专属图时用该分类商品首图。详见 docs/feishu-banner-fields.md</p>
 
       <h2 style="margin-top:4px">五、支付配置表（选填）</h2>
       <table class="mini">

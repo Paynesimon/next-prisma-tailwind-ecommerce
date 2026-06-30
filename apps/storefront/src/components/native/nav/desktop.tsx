@@ -27,7 +27,15 @@ export function MainNav() {
    )
 }
 
-export function NavMenu() {
+export function NavMenu({
+   labels = {
+      products: 'Products',
+      categories: 'Categories',
+      brands: 'Brands',
+   },
+}: {
+   labels?: { products: string; categories: string; brands: string }
+}) {
    const [categories, setCategories] = useState([])
    const [brands, setBrands] = useState([])
 
@@ -43,7 +51,7 @@ export function NavMenu() {
                <Link href="/products" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                      <div className="font-normal text-foreground/70">
-                        Products
+                        {labels.products}
                      </div>
                   </NavigationMenuLink>
                </Link>
@@ -52,7 +60,7 @@ export function NavMenu() {
             <NavigationMenuItem>
                <NavigationMenuTrigger>
                   <div className="font-normal text-foreground/70">
-                     Categories
+                     {labels.categories}
                   </div>
                </NavigationMenuTrigger>
                <NavigationMenuContent>
@@ -78,7 +86,7 @@ export function NavMenu() {
 
             <NavigationMenuItem>
                <NavigationMenuTrigger>
-                  <div className="font-normal text-foreground/70">Brands</div>
+                  <div className="font-normal text-foreground/70">{labels.brands}</div>
                </NavigationMenuTrigger>
                <NavigationMenuContent>
                   <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">

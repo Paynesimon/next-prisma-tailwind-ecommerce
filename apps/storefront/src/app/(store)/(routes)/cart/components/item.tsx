@@ -12,19 +12,35 @@ import {
    CardTitle,
 } from '@/components/ui/card'
 import { useAuthenticated } from '@/hooks/useAuthentication'
-import { getCountInCart, getLocalCart, writeLocalCart } from '@/lib/cart'
+import { getCountInCart, getLocalCart } from '@/lib/cart'
+import {
+   formatMoqLabel,
+   getProductMoq,
+   nextAddCount,
+   nextRemoveCount,
+} from '@/lib/moq'
+import { formatMoney } from '@/lib/locale'
+import type { StorefrontTheme } from '@/lib/theme'
+import { cn } from '@/lib/utils'
 import { useCartContext } from '@/state/Cart'
 import { MinusIcon, PlusIcon, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-export const Item = ({ cartItem }) => {
+export const Item = ({
+   cartItem,
+   theme = 'shop',
+}: {
+   cartItem: any
+   theme?: StorefrontTheme
+}) => {
    const { authenticated } = useAuthenticated()
    const { loading, cart, refreshCart, dispatchCart } = useCartContext()
    const [fetchingCart, setFetchingCart] = useState(false)
 
    const { product, productId, count } = cartItem
+   const moq = getProductMoq(product)
 
    function findLocalCartIndexById(array, productId) {
       for (let i = 0; i < array.length; i++) {
@@ -56,13 +72,16 @@ export const Item = ({ cartItem }) => {
       try {
          setFetchingCart(true)
 
+         const count = getCountInCart({ cartItems: cart?.items, productId })
+         const moq = getProductMoq(product)
+         const newCount = nextAddCount(count, moq)
+
          if (authenticated) {
             const response = await fetch(`/api/cart`, {
                method: 'POST',
                body: JSON.stringify({
                   productId,
-                  count:
-                     getCountInCart({ cartItems: cart?.items, productId }) + 1,
+                  count: newCount,
                }),
                cache: 'no-store',
                headers: {
@@ -77,27 +96,21 @@ export const Item = ({ cartItem }) => {
 
          const localCart = getLocalCart() as any
 
-         if (
-            !authenticated &&
-            getCountInCart({ cartItems: cart?.items, productId }) > 0
-         ) {
+         if (!authenticated && count > 0) {
             for (let i = 0; i < localCart.items.length; i++) {
                if (localCart.items[i].productId === productId) {
-                  localCart.items[i].count = localCart.items[i].count + 1
+                  localCart.items[i].count = newCount
                }
             }
 
             dispatchCart(localCart)
          }
 
-         if (
-            !authenticated &&
-            getCountInCart({ cartItems: cart?.items, productId }) < 1
-         ) {
+         if (!authenticated && count < 1) {
             localCart.items.push({
                productId,
-               product: await getProduct(),
-               count: 1,
+               product: product || (await getProduct()),
+               count: moq,
             })
 
             dispatchCart(localCart)
@@ -113,13 +126,16 @@ export const Item = ({ cartItem }) => {
       try {
          setFetchingCart(true)
 
+         const count = getCountInCart({ cartItems: cart?.items, productId })
+         const moq = getProductMoq(product)
+         const newCount = nextRemoveCount(count, moq)
+
          if (authenticated) {
             const response = await fetch(`/api/cart`, {
                method: 'POST',
                body: JSON.stringify({
                   productId,
-                  count:
-                     getCountInCart({ cartItems: cart?.items, productId }) - 1,
+                  count: newCount,
                }),
                cache: 'no-store',
                headers: {
@@ -134,24 +150,16 @@ export const Item = ({ cartItem }) => {
          const localCart = getLocalCart() as any
          const index = findLocalCartIndexById(localCart, productId)
 
-         if (
-            !authenticated &&
-            getCountInCart({ cartItems: cart?.items, productId }) > 1
-         ) {
-            for (let i = 0; i < localCart.items.length; i++) {
-               if (localCart.items[i].productId === product?.id) {
-                  localCart.items[i].count = localCart.items[i].count - 1
+         if (!authenticated && count > 0) {
+            if (newCount <= 0) {
+               localCart.items.splice(index, 1)
+            } else {
+               for (let i = 0; i < localCart.items.length; i++) {
+                  if (localCart.items[i].productId === productId) {
+                     localCart.items[i].count = newCount
+                  }
                }
             }
-
-            dispatchCart(localCart)
-         }
-
-         if (
-            !authenticated &&
-            getCountInCart({ cartItems: cart?.items, productId }) === 1
-         ) {
-            localCart.items.splice(index, 1)
 
             dispatchCart(localCart)
          }
@@ -167,6 +175,8 @@ export const Item = ({ cartItem }) => {
          cartItems: cart?.items,
          productId,
       })
+      const moq = getProductMoq(product)
+      const removeClears = nextRemoveCount(count, moq) === 0
 
       if (fetchingCart)
          return (
@@ -183,7 +193,7 @@ export const Item = ({ cartItem }) => {
          return (
             <>
                <Button variant="outline" size="icon" onClick={onRemoveFromCart}>
-                  {count === 1 ? (
+                  {removeClears ? (
                      <X className="h-4" />
                   ) : (
                      <MinusIcon className="h-4" />
@@ -212,18 +222,24 @@ export const Item = ({ cartItem }) => {
          return (
             <div className="flex gap-2 items-center">
                <Badge className="flex gap-4" variant="destructive">
-                  <div className="line-through">${product?.price}</div>
+                  <div className="line-through">{formatMoney(product?.price)}</div>
                   <div>%{percentage.toFixed(2)}</div>
                </Badge>
-               <h2 className="">${price.toFixed(2)}</h2>
+               <p className="font-semibold">{formatMoney(price)}</p>
             </div>
          )
       }
 
-      return <h2>${product?.price}</h2>
+      return <p className="font-semibold">{formatMoney(product?.price)}</p>
    }
    return (
-      <Card>
+      <Card
+         className={cn(
+            theme === 'shop' && 'overflow-hidden transition hover:shadow-md',
+            theme === 'corporate' && 'border shadow-sm',
+            theme === 'blog' && 'border-dashed'
+         )}
+      >
          <CardHeader className="p-0 md:hidden">
             <div className="relative h-32 w-full">
                <Link href={`/products/${product?.id}`}>
@@ -258,6 +274,11 @@ export const Item = ({ cartItem }) => {
                   {product?.description}
                </p>
                <Price />
+               {moq > 1 ? (
+                  <p className="text-xs text-muted-foreground">
+                     {formatMoqLabel(moq)}
+                  </p>
+               ) : null}
                <CartButton />
             </div>
          </CardContent>

@@ -7,6 +7,15 @@ export async function middleware(req: NextRequest) {
    if (req.nextUrl.pathname.startsWith('/api/webhook')) return NextResponse.next()
    if (req.nextUrl.pathname.startsWith('/api/categories')) return NextResponse.next()
    if (req.nextUrl.pathname.startsWith('/api/brands')) return NextResponse.next()
+   if (req.nextUrl.pathname.startsWith('/api/newsletter')) return NextResponse.next()
+   if (req.nextUrl.pathname.startsWith('/api/messages')) return NextResponse.next()
+   if (req.nextUrl.pathname.startsWith('/api/blog/')) return NextResponse.next()
+   if (
+      req.nextUrl.pathname === '/api/reviews' &&
+      req.method === 'GET'
+   ) {
+      return NextResponse.next()
+   }
 
    function isTargetingAPI() {
       return req.nextUrl.pathname.startsWith('/api')

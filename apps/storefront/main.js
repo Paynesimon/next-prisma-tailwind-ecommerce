@@ -133,27 +133,9 @@ function recordsForClient(items, clientId) {
    return items.filter((r) => String(r.fields['客户ID'] || '').trim() === clientId)
 }
 
-function mapProductRecord(r) {
-   const f = r.fields
-   return {
-      title: f['商品名称'] || '',
-      brand: f['品牌'] || '',
-      price: parseFloat(f['价格']) || 0,
-      description: f['商品描述'] || '',
-      images: [f['图片URL'] || ''],
-      categories: f['分类'] ? f['分类'].split(',').map((c) => c.trim()) : [],
-      keywords: f['关键词'] ? f['关键词'].split(',').map((k) => k.trim()) : [],
-      isAvailable: f['是否上架'] ?? true,
-   }
-}
-
-function mapBannerRecord(r) {
-   return {
-      image: r.fields['图片URL'] || '',
-      label: r.fields['标签名'] || '',
-      order: r.fields['排序'] || 0,
-   }
-}
+const { mapProductRecord, normalizeTheme } = require('./feishu-product')
+const { bannerRecordsForClient, isCarouselBanner, syncBannersToDb } = require('./feishu-banner')
+const { mapFeaturesFromStoreFields } = require('./feishu-features')
 
 async function fetchFeishuData(clientId) {
    const token = await getFeishuToken()
@@ -176,6 +158,7 @@ async function fetchFeishuData(clientId) {
       creator: f['创建者'] || 'My Shop',
       keywords: f['关键词'] ? f['关键词'].split(',').map((k) => k.trim()) : [],
       contactEmail: f['联系邮箱'] || '',
+      whatsappLink: f['WhatsApp链接'] || '',
       telegramLink: f['Telegram链接'] || '',
       instagramLink: f['Instagram链接'] || '',
       twitterLink: f['Twitter链接'] || '',
@@ -188,10 +171,12 @@ async function fetchFeishuData(clientId) {
    const adminEmail = (f['管理员邮箱'] || MAIL_SMTP_USER).toLowerCase().trim()
    const customDomain = f['自定义域名'] || ''
    const locale = parseLocaleFromFeishuFields(f)
+   const theme = normalizeTheme(f['前端模板'] || 'shop')
+   const features = mapFeaturesFromStoreFields(f)
 
    const products = recordsForClient(productItems, clientId).map(mapProductRecord)
 
-   const banners = recordsForClient(bannerItems, clientId).map(mapBannerRecord)
+   const banners = bannerRecordsForClient(bannerItems, clientId)
 
    const paymentItem = paymentItems.find((r) => r.fields['客户ID'] === clientId)
    const payment = {
@@ -205,7 +190,7 @@ async function fetchFeishuData(clientId) {
    log('🌍', `语言/地区：${locale.language} · ${locale.region} · ${locale.currency}`)
    if (customDomain) log('🌐', `自定义域名：${customDomain}`)
 
-   return { store, products, banners, storeRecordId: storeItem.record_id, token, adminEmail, payment, customDomain, locale }
+   return { store, products, banners, storeRecordId: storeItem.record_id, token, adminEmail, payment, customDomain, locale, theme, features }
 }
 
 // ===== 第二步：创建独立数据库 =====
@@ -266,11 +251,11 @@ async function syncDatabase(products, banners, connectionString, adminEmail) {
       }
 
       if (banners.length) {
-         await prisma.banner.deleteMany()
-         for (const b of banners) {
-            if (!b.image) continue
-            await prisma.banner.create({ data: { image: b.image, label: b.label } })
-         }
+         const stats = await syncBannersToDb(prisma, banners)
+         log(
+            '✅',
+            `Banner 同步完成：${stats.total} 条（首页轮播 ${stats.carousel}，分类封面 ${stats.categoryCovers}）`
+         )
       }
 
       const productTitles = products.map((p) => p.title).filter(Boolean)
@@ -303,6 +288,7 @@ async function syncDatabase(products, banners, connectionString, adminEmail) {
                   price: p.price, description: p.description,
                   images: p.images, keywords: p.keywords,
                   isAvailable: p.isAvailable, brandId: brand.id,
+                  metadata: p.metadata ?? undefined,
                   categories: { set: [{ title: categoryTitle }] },
                },
             })
@@ -313,6 +299,7 @@ async function syncDatabase(products, banners, connectionString, adminEmail) {
                   title: p.title, price: p.price,
                   description: p.description, images: p.images,
                   keywords: p.keywords, isAvailable: p.isAvailable,
+                  metadata: p.metadata ?? undefined,
                   stock: 10, discount: 0,
                   brand: { connect: { id: brand.id } },
                   categories: { connect: [{ title: categoryTitle }] },
@@ -328,13 +315,17 @@ async function syncDatabase(products, banners, connectionString, adminEmail) {
 }
 
 // ===== 第五步：写 config.json =====
-function writeConfig(store, products, banners, locale) {
+function writeConfig(store, products, banners, locale, theme, features) {
    fs.writeFileSync(
       CONFIG_PATH,
-      JSON.stringify({ locale, store, products, banners }, null, 2),
+      JSON.stringify(
+         { locale, theme: theme || 'shop', features, store, products, banners },
+         null,
+         2
+      ),
       'utf-8'
    )
-   log('✅', `config.json 已更新（${locale.language} / ${locale.region} / ${locale.currency}）`)
+   log('✅', `config.json 已更新（${locale.language} / ${locale.region} / ${locale.currency} / theme=${theme || 'shop'}）`)
 }
 
 // ===== 第六步：GitHub 建库 + Push =====
@@ -566,7 +557,7 @@ async function main() {
    await generateAIContent(clientId)
 
    console.log('📋 第一步：抓取飞书数据...')
-      const { store, products, banners, storeRecordId, token, adminEmail, payment, customDomain, locale } = await fetchFeishuData(clientId)
+      const { store, products, banners, storeRecordId, token, adminEmail, payment, customDomain, locale, theme, features } = await fetchFeishuData(clientId)
 
       console.log('\n🗄️  第二步：创建独立数据库...')
       const { connectionString } = await createDatabase(clientId, locale)
@@ -578,7 +569,14 @@ async function main() {
       await syncDatabase(products, banners, connectionString, adminEmail)
 
       console.log('\n📝 第五步：更新 config.json...')
-      writeConfig(store, products, banners, locale)
+      writeConfig(
+         store,
+         products,
+         banners.filter(isCarouselBanner),
+         locale,
+         theme,
+         features
+      )
 
       console.log('\n📦 第六步：推送前台代码到 GitHub...')
       const storefrontRepoId = await pushToGithub(clientId, 'site', STOREFRONT_DIR)
@@ -600,6 +598,7 @@ async function main() {
          { key: 'NEXT_PUBLIC_CURRENCY', value: locale.currency, type: 'plain', target: ['production', 'preview', 'development'] },
          { key: 'NEXT_PUBLIC_COUNTRY_CODE', value: locale.countryCode, type: 'plain', target: ['production', 'preview', 'development'] },
          { key: 'NEXT_PUBLIC_TAX_RATE', value: String(locale.taxRate), type: 'plain', target: ['production', 'preview', 'development'] },
+         { key: 'NEXT_PUBLIC_THEME', value: theme || 'shop', type: 'plain', target: ['production', 'preview', 'development'] },
          { key: 'STORE_TIMEZONE', value: locale.timezone, type: 'plain', target: ['production', 'preview', 'development'] },
       ]
 

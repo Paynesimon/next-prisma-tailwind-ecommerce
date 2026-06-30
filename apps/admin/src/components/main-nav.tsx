@@ -32,6 +32,21 @@ export function MainNav({
          active: pathname.includes(`/orders`),
       },
       {
+         href: `/messages`,
+         label: 'Messages',
+         active: pathname.includes(`/messages`),
+      },
+      {
+         href: `/reviews`,
+         label: 'Reviews',
+         active: pathname.includes(`/reviews`),
+      },
+      {
+         href: `/blog-comments`,
+         label: 'Comments',
+         active: pathname.includes(`/blog-comments`),
+      },
+      {
          href: `/payments`,
          label: 'Payments',
          active: pathname.includes(`/payments`),

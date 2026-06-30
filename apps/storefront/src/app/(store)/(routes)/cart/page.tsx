@@ -1,18 +1,8 @@
-'use client'
+import { getTheme } from '@/lib/theme'
 
-import { Heading } from '@/components/native/heading'
-import { CartContextProvider } from '@/state/Cart'
+import { ThemedCartPage } from '@/themes/cart/ThemedCartPage'
 
-import { CartGrid } from './components/grid'
-
-export default function Cart() {
-   return (
-      <CartContextProvider>
-         <Heading
-            title="Cart"
-            description="Below is a list of products you have in your cart."
-         />
-         <CartGrid />
-      </CartContextProvider>
-   )
+export default function CartPage() {
+   const theme = getTheme()
+   return <ThemedCartPage theme={theme} />
 }

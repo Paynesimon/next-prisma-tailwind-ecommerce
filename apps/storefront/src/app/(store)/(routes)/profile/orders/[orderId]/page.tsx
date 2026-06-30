@@ -1,22 +1,16 @@
 'use client'
 
-import {
-   Card,
-   CardContent,
-   CardFooter,
-   CardHeader,
-   CardTitle,
-} from '@/components/ui/card'
-import { Loader } from '@/components/ui/loader'
 import { useAuthenticated } from '@/hooks/useAuthentication'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { UserCombobox } from '../../components/switcher'
+import { OrderDetailCard } from './components/order-reviews'
 
 const ProductPage = ({ params }: { params: { orderId: string } }) => {
    const { authenticated } = useAuthenticated()
    const [order, setOrder] = useState(null)
+   const [loading, setLoading] = useState(true)
    const pathname = usePathname()
 
    useEffect(() => {
@@ -31,39 +25,21 @@ const ProductPage = ({ params }: { params: { orderId: string } }) => {
             setOrder(json)
          } catch (error) {
             console.error({ error })
+         } finally {
+            setLoading(false)
          }
       }
 
       if (authenticated) getOrder()
-   }, [authenticated, params])
-
-   function EditOrderCard() {
-      return (
-         <Card className="my-4 p-2">
-            <CardContent>
-               {order ? (
-                  <div>{order.id}</div>
-               ) : (
-                  <div className="h-[20vh]">
-                     <div className="h-full my-4 flex items-center justify-center">
-                        <Loader />
-                     </div>
-                  </div>
-               )}
-            </CardContent>
-         </Card>
-      )
-   }
+   }, [authenticated, params.orderId])
 
    return (
       <div className="flex-col">
          <div className="flex-1">
             <div className="flex items-center justify-between">
-               <div className="flex items-center justify-between">
-                  <UserCombobox initialValue={pathname} />
-               </div>
+               <UserCombobox initialValue={pathname} />
             </div>
-            <EditOrderCard />
+            <OrderDetailCard order={order} loading={authenticated && loading} />
          </div>
       </div>
    )
