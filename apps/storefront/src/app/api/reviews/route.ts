@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma'
 import { getOptionalUserId } from '@/lib/request-auth'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: Request) {
    try {
       if (!isFeatureEnabled('productReviews')) {

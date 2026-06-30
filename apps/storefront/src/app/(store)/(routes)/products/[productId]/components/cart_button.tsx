@@ -56,9 +56,14 @@ export function ButtonComponent({ product }) {
                }),
                cache: 'no-store',
                headers: {
-                  'Content-Type': 'application/json-string',
+                  'Content-Type': 'application/json',
                },
             })
+
+            if (!response.ok) {
+               setFetchingCart(false)
+               return
+            }
 
             const json = await response.json()
 
@@ -113,9 +118,14 @@ export function ButtonComponent({ product }) {
                }),
                cache: 'no-store',
                headers: {
-                  'Content-Type': 'application/json-string',
+                  'Content-Type': 'application/json',
                },
             })
+
+            if (!response.ok) {
+               setFetchingCart(false)
+               return
+            }
 
             const json = await response.json()
 

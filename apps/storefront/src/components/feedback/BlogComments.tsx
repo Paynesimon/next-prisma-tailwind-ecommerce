@@ -27,8 +27,6 @@ export function BlogComments({
    slug: string
    theme?: StorefrontTheme
 }) {
-   if (!isFeatureEnabled('blogComments')) return null
-
    const copy = getFeedbackCopy()
    const { authenticated } = useAuthenticated()
    const [comments, setComments] = useState<Comment[]>([])
@@ -39,14 +37,27 @@ export function BlogComments({
    const [loading, setLoading] = useState(false)
    const [message, setMessage] = useState('')
 
-   const load = useCallback(async () => {
-      const res = await fetch(`/api/blog/${slug}/comments`, { cache: 'no-store' })
-      const data = await res.json()
-      setComments(data.comments || [])
+   const load = useCallback(async (signal?: AbortSignal) => {
+      try {
+         const res = await fetch(`/api/blog/${encodeURIComponent(slug)}/comments`, {
+            cache: 'no-store',
+            credentials: 'include',
+            signal,
+         })
+
+         if (!res.ok) return
+
+         const data = await res.json()
+         setComments(data.comments || [])
+      } catch (error) {
+         if (error instanceof DOMException && error.name === 'AbortError') return
+      }
    }, [slug])
 
    useEffect(() => {
-      load()
+      const controller = new AbortController()
+      load(controller.signal)
+      return () => controller.abort()
    }, [load])
 
    async function onSubmit(e: React.FormEvent) {
@@ -76,6 +87,8 @@ export function BlogComments({
          setLoading(false)
       }
    }
+
+   if (!isFeatureEnabled('blogComments')) return null
 
    return (
       <section className={cn('mt-12 space-y-6 border-t pt-10', feedbackSectionClass(theme))}>

@@ -127,6 +127,10 @@
       <h3>建议填写</h3>
       <table class="mini">
         <tr><td>关键词</td><td>逗号分隔，SEO 用</td></tr>
+        <tr><td>主题</td><td>shop / corporate / blog，默认 shop</td></tr>
+        <tr><td>目标地区</td><td>US/EU/UK/CN/SEA/JP/RU/LATAM/ME/AF/CA，决定默认货币与时区</td></tr>
+        <tr><td>默认语言</td><td>en/zh-CN/ja/ru/es/pt/ar；ar 自动 RTL</td></tr>
+        <tr><td>货币 / 时区</td><td>可覆盖地区预设</td></tr>
         <tr><td>联系邮箱 / 创建者</td><td>客服与品牌名</td></tr>
         <tr><td>开启商品评价</td><td>是/否，默认是；关闭后隐藏评价与卡片评分</td></tr>
         <tr><td>开启博客评论</td><td>是/否，默认是</td></tr>
@@ -139,16 +143,24 @@
 
     <section>
       <h2>三、商品表</h2>
-      <p style="font-size:6.5pt;margin-bottom:2px">每件商品一行，<strong>客户ID 须与店铺表一致</strong></p>
+      <p style="font-size:6.5pt;margin-bottom:2px">每件商品一行，<strong>客户ID 须与店铺表一致</strong>。改商品走 sync，约 1 分钟生效，无需重新部署。</p>
       <table class="mini">
         <tr><th>字段</th><th>说明</th></tr>
         <tr><td class="req">客户ID</td><td>归属客户</td></tr>
         <tr><td class="req">商品名称</td><td>改名=新商品</td></tr>
         <tr><td class="req">价格</td><td>数字</td></tr>
         <tr><td class="req">图片URL</td><td>HTTPS 公网图链</td></tr>
-        <tr><td class="opt">品牌/分类/描述/关键词</td><td>描述可 AI 生成</td></tr>
+        <tr><td class="opt">品牌</td><td>详情页展示，可按品牌筛选</td></tr>
+        <tr><td class="opt">分类</td><td>逗号分隔，可按分类筛选</td></tr>
+        <tr><td class="opt">商品描述</td><td>详情页「商品简介」，可 AI 生成</td></tr>
+        <tr><td class="opt">关键词</td><td>逗号分隔，SEO 用</td></tr>
         <tr><td class="opt">是否上架</td><td>默认上架</td></tr>
+        <tr><td class="opt">起订量</td><td>如 10；购物车/结算校验 MOQ</td></tr>
+        <tr><td class="opt">批次价格</td><td>数量:单价，逗号或换行分隔，如 100:9.5,500:8.0</td></tr>
+        <tr><td class="opt">规格参数</td><td>参数名:值，如 材质:不锈钢,尺寸:10×20cm</td></tr>
+        <tr><td class="opt">详情HTML</td><td>富文本 HTML 详情；字段名也可用「商品详情HTML」</td></tr>
       </table>
+      <p class="note">详情页结构：上方购买区 → 简介 / 规格 / 图文详情 → 商品评价（可开关）。详见 docs/使用指南.md</p>
     </section>
 
     <section>
@@ -227,6 +239,6 @@
     </section>
   </div>
 
-  <p class="footer">MyShop 自动化建站 · 客户开站资料清单 · 2025</p>
+  <p class="footer">MyShop 自动化建站 · 客户开站资料清单 · 详见 docs/使用指南.md · 2025</p>
 </body>
 </html>

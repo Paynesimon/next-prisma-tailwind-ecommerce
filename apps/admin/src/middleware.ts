@@ -38,6 +38,15 @@ export async function middleware(req: NextRequest) {
 
    try {
       const { sub } = await verifyJWT<{ sub: string }>(token)
+      if (!sub) {
+         if (isTargetingAPI()) {
+            return getErrorResponse(401, 'UNAUTHORIZED')
+         }
+         const redirect = NextResponse.redirect(new URL(`/login`, req.url))
+         redirect.cookies.delete('token')
+         redirect.cookies.delete('logged-in')
+         return redirect
+      }
       response.headers.set('X-USER-ID', sub)
    } catch (error) {
       if (isTargetingAPI()) {

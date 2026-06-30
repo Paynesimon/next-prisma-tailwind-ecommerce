@@ -1,4 +1,4 @@
-import { getLocale } from '@/lib/locale'
+import { t } from '@/i18n'
 
 import { parseProductMetadata } from './product-metadata'
 
@@ -26,35 +26,14 @@ export function nextRemoveCount(currentCount: number, moq: number): number {
 
 export function formatMoqLabel(moq: number): string {
    if (moq <= 1) return ''
-   const lang = getLocale().language
-   const base = lang.split('-')[0]
-   const labels: Record<string, (n: number) => string> = {
-      en: (n) => `MOQ: ${n}`,
-      zh: (n) => `起订量 ${n} 件`,
-      ja: (n) => `最小ロット ${n}`,
-   }
-   const fn = labels[lang] || labels[base] || labels.en
-   return fn(moq)
+   return t('product.moqLabel', { count: moq })
 }
 
 export function moqBelowMessage(moq: number, productTitle?: string): string {
-   const lang = getLocale().language
-   const base = lang.split('-')[0]
-   const name = productTitle ? `「${productTitle}」` : ''
-   const labels: Record<string, (n: number, p: string) => string> = {
-      en: (n, p) =>
-         p
-            ? `${p} requires a minimum order of ${n} units.`
-            : `Minimum order is ${n} units.`,
-      zh: (n, p) =>
-         p ? `${p} 起订量为 ${n} 件，请调整数量。` : `起订量为 ${n} 件。`,
-      ja: (n, p) =>
-         p
-            ? `${p}の最小注文数は ${n} です。`
-            : `最小注文数は ${n} です。`,
+   if (productTitle) {
+      return t('product.moqBelowNamed', { name: productTitle, count: moq })
    }
-   const fn = labels[lang] || labels[base] || labels.en
-   return fn(moq, name)
+   return t('product.moqBelow', { count: moq })
 }
 
 export type CartMoqIssue = {

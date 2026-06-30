@@ -53,18 +53,15 @@ export const Item = ({
 
    async function getProduct() {
       try {
-         const response = await fetch(`/api/product`, {
-            method: 'POST',
-            body: JSON.stringify({ productId }),
+         const response = await fetch(`/api/products/${productId}`, {
             cache: 'no-store',
-            headers: {
-               'Content-Type': 'application/json-string',
-            },
          })
 
+         if (!response.ok) return null
          return await response.json()
       } catch (error) {
          console.error({ error })
+         return null
       }
    }
 
@@ -85,9 +82,14 @@ export const Item = ({
                }),
                cache: 'no-store',
                headers: {
-                  'Content-Type': 'application/json-string',
+                  'Content-Type': 'application/json',
                },
             })
+
+            if (!response.ok) {
+               setFetchingCart(false)
+               return
+            }
 
             const json = await response.json()
 
@@ -139,9 +141,14 @@ export const Item = ({
                }),
                cache: 'no-store',
                headers: {
-                  'Content-Type': 'application/json-string',
+                  'Content-Type': 'application/json',
                },
             })
+
+            if (!response.ok) {
+               setFetchingCart(false)
+               return
+            }
 
             const json = await response.json()
             dispatchCart(json)

@@ -1,5 +1,6 @@
 import Carousel from '@/components/native/Carousel'
 import { JsonLd } from '@/components/native/JsonLd'
+import { ProductDetailSections } from '@/components/native/ProductDetailSections'
 import { ProductReviews } from '@/components/feedback/ProductReviews'
 import { isFeatureEnabled } from '@/lib/features'
 import { getLocale } from '@/lib/locale'
@@ -13,6 +14,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { DataSection } from './components/data'
+import { getMessages } from '@/i18n'
 
 type Props = {
    params: { productId: string }
@@ -96,6 +98,11 @@ export default async function Product({
             <ImageColumn product={product} />
             <DataSection product={product} soldCount={soldCount} />
          </div>
+         <ProductDetailSections
+            description={product.description}
+            metadata={product.metadata}
+            theme={theme}
+         />
          {isFeatureEnabled('productReviews') ? (
             <ProductReviews productId={product.id} theme={theme} />
          ) : null}
@@ -112,6 +119,8 @@ const ImageColumn = ({ product }) => {
 }
 
 const Breadcrumbs = ({ product }) => {
+   const common = getMessages().common
+
    return (
       <nav className="flex text-muted-foreground" aria-label="Breadcrumb">
          <ol className="inline-flex items-center gap-2">
@@ -120,20 +129,20 @@ const Breadcrumbs = ({ product }) => {
                   href="/"
                   className="inline-flex items-center text-sm font-medium"
                >
-                  Home
+                  {common.home}
                </Link>
             </li>
             <li>
                <div className="flex items-center gap-2">
-                  <ChevronRightIcon className="h-4" />
+                  <ChevronRightIcon className="h-4 rtl:rotate-180" />
                   <Link className="text-sm font-medium" href="/products">
-                     Products
+                     {common.products}
                   </Link>
                </div>
             </li>
             <li aria-current="page">
                <div className="flex items-center gap-2">
-                  <ChevronRightIcon className="h-4" />
+                  <ChevronRightIcon className="h-4 rtl:rotate-180" />
                   <span className="text-sm font-medium">{product?.title}</span>
                </div>
             </li>

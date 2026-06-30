@@ -2,13 +2,14 @@ import { GeoJsonLd } from '@/components/native/GeoJsonLd'
 import { ModalProvider } from '@/providers/modal-provider'
 import { ThemeProvider } from '@/providers/theme-provider'
 import { ToastProvider } from '@/providers/toast-provider'
-import { Inter } from 'next/font/google'
+import { Inter, Noto_Sans_Arabic } from 'next/font/google'
 import { config } from '@/lib/config'
-import { getHtmlLang } from '@/lib/locale'
+import { getHtmlLang, isHtmlRtl } from '@/lib/locale'
 
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
+const notoArabic = Noto_Sans_Arabic({ subsets: ['arabic'] })
 
 export const metadata = {
    title: config.store.name,
@@ -24,9 +25,11 @@ export default async function RootLayout({
 }: {
    children: React.ReactNode
 }) {
+   const rtl = isHtmlRtl()
+
    return (
-      <html lang={getHtmlLang()}>
-         <body className={inter.className}>
+      <html lang={getHtmlLang()} dir={rtl ? 'rtl' : 'ltr'}>
+         <body className={rtl ? notoArabic.className : inter.className}>
             <GeoJsonLd />
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                <ToastProvider />

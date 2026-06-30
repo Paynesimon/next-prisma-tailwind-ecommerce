@@ -3,7 +3,7 @@ import MDXComponents from '@/components/native/mdx/MDXComponents'
 import { getTheme } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
-import { MDXRemote } from 'next-mdx-remote'
+import { MDXRemote } from 'next-mdx-remote/rsc'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -23,13 +23,11 @@ type BlogPost = {
    author?: { name?: string | null; avatar?: string | null }
 }
 
-export function BlogArticleLayout({
+export async function BlogArticleLayout({
    blog,
-   mdx,
    recommendations,
 }: {
    blog: BlogPost
-   mdx: Awaited<ReturnType<typeof import('next-mdx-remote/serialize').serialize>>
    recommendations: BlogPost[]
 }) {
    const theme = getTheme()
@@ -94,7 +92,7 @@ export function BlogArticleLayout({
             ) : null}
 
             <div className={blogProseClass(theme)}>
-               <MDXRemote lazy {...mdx} components={MDXComponents} />
+               <MDXRemote source={blog.content || ''} components={MDXComponents} />
             </div>
 
             <Separator />

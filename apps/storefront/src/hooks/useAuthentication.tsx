@@ -8,17 +8,18 @@ export function useAuthenticated() {
 
    useEffect(() => {
       try {
-         if (typeof window !== 'undefined' && window.localStorage) {
-            const cookies = document.cookie.split(';')
-            const loggedInCookie =
-               cookies
-                  .find((cookie) => cookie.startsWith('logged-in'))
-                  .split('=')[1] === 'true'
+         if (typeof window === 'undefined') return
 
-            setAuthenticated(loggedInCookie ?? false)
-         }
+         const match = document.cookie
+            .split(';')
+            .map((c) => c.trim())
+            .find((cookie) => cookie.startsWith('logged-in='))
+
+         const loggedIn = match?.split('=')[1]?.trim() === 'true'
+         setAuthenticated(loggedIn)
       } catch (error) {
          console.error({ error })
+         setAuthenticated(false)
       }
    }, [])
 

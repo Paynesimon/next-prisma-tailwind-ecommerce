@@ -4,7 +4,6 @@ import { isFeatureEnabled } from '@/lib/features'
 import prisma from '@/lib/prisma'
 import { getTheme } from '@/lib/theme'
 import { BlogArticleLayout } from '@/themes/blog/BlogArticleLayout'
-import { serialize } from 'next-mdx-remote/serialize'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
@@ -53,7 +52,6 @@ export default async function BlogPostPage({ params }: Props) {
       orderBy: { createdAt: 'desc' },
    })
 
-   const mdx = await serialize(blog.content || '')
    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
    const theme = getTheme()
 
@@ -85,7 +83,6 @@ export default async function BlogPostPage({ params }: Props) {
          <JsonLd data={jsonLd} />
          <BlogArticleLayout
             blog={blog}
-            mdx={mdx}
             recommendations={recommendations}
          />
          {isFeatureEnabled('blogComments') ? (

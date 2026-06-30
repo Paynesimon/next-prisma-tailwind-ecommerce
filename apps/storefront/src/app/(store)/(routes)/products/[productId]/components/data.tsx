@@ -3,6 +3,7 @@ import { Separator } from '@/components/native/separator'
 import { PriceTiersTable } from '@/components/native/PriceTiers'
 import { WholesaleContact } from '@/components/native/WholesaleContact'
 import { getFeedbackCopy } from '@/lib/feedback-copy'
+import { getMessages } from '@/i18n'
 import { isFeatureEnabled } from '@/lib/features'
 import { getTheme } from '@/lib/theme'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +23,7 @@ export const DataSection = async ({
    soldCount?: number
 }) => {
    const metadata = parseProductMetadata(product.metadata)
+   const common = getMessages().common
    function Price() {
       if (product?.discount > 0) {
          const price = product?.price - product?.discount
@@ -50,22 +52,19 @@ export const DataSection = async ({
          ) : null}
          <Separator />
          <div className="flex gap-2 mb-2 items-center">
-            <p className="text-sm">Brand:</p>
+            <p className="text-sm">{common.brand}:</p>
             <Link href={`/products?brand=${product?.brand?.title}`}>
                <Badge variant="outline">{product?.brand?.title}</Badge>
             </Link>
          </div>
          <div className="flex gap-2 items-center">
-            <p className="text-sm">Categories:</p>
+            <p className="text-sm">{common.categories}:</p>
             {product.categories.map(({ title }, index) => (
                <Link key={index} href={`/products?categories=${title}`}>
                   <Badge variant="outline">{title}</Badge>
                </Link>
             ))}
          </div>
-         <Separator />
-         <small>{product.description}</small>
-
          <Separator />
          <div className="block space-y-3">
             <Price />

@@ -1,6 +1,7 @@
 import { ProductGrid, ProductSkeletonGrid } from '@/components/native/Product'
 import { Heading } from '@/components/native/heading'
 import { Separator } from '@/components/native/separator'
+import { getMessages } from '@/i18n'
 import prisma from '@/lib/prisma'
 import { getSoldCounts } from '@/lib/product-stats'
 import { getProductRatingSummaries } from '@/lib/product-ratings'
@@ -53,11 +54,13 @@ export default async function Products({ searchParams }) {
       ? await getProductRatingSummaries(products.map((p) => p.id))
       : {}
 
+   const pages = getMessages().pages
+
    return (
       <>
          <Heading
-            title="Products"
-            description="Below is a list of products you have in your cart."
+            title={pages.productsTitle}
+            description={pages.productsDesc}
          />
          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
             <SortBy initialData={sort} />

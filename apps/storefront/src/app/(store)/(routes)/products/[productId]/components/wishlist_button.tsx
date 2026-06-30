@@ -50,7 +50,7 @@ export default function WishlistButton({ product }) {
             body: JSON.stringify({ productId: product?.id, connect: true }),
             cache: 'no-store',
             headers: {
-               'Content-Type': 'application/json-string',
+               'Content-Type': 'application/json',
             },
          })
 
@@ -72,7 +72,7 @@ export default function WishlistButton({ product }) {
             body: JSON.stringify({ productId: product.id, connect: false }),
             cache: 'no-store',
             headers: {
-               'Content-Type': 'application/json-string',
+               'Content-Type': 'application/json',
             },
          })
 

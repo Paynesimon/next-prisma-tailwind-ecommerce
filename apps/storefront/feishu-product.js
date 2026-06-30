@@ -17,12 +17,33 @@ function parsePriceTiers(raw) {
       .filter(Boolean)
 }
 
+function parseSpecs(raw) {
+   if (!raw || typeof raw !== 'string') return []
+   return raw
+      .split(/[,，\n]/)
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) => {
+         const sep = part.search(/[:：]/)
+         if (sep === -1) return null
+         const label = part.slice(0, sep).trim()
+         const value = part.slice(sep + 1).trim()
+         if (!label || !value) return null
+         return { label, value }
+      })
+      .filter(Boolean)
+}
+
 function productMetadataFromFields(f) {
    const moq = parseInt(f['起订量'], 10)
    const priceTiers = parsePriceTiers(f['批次价格'] || '')
+   const specs = parseSpecs(f['规格参数'] || '')
+   const detailHtml = String(f['详情HTML'] || f['商品详情HTML'] || '').trim()
    const metadata = {}
    if (Number.isFinite(moq) && moq > 0) metadata.moq = moq
    if (priceTiers.length) metadata.priceTiers = priceTiers
+   if (specs.length) metadata.specs = specs
+   if (detailHtml) metadata.detailHtml = detailHtml
    return Object.keys(metadata).length ? metadata : undefined
 }
 

@@ -4,15 +4,16 @@ import Step from '@/components/native/mdx/Step'
 import Image from 'next/image'
 import Link from 'next/link'
 
-function MDXImage({ alt, src }) {
+function MDXImage({ alt, src }: { alt?: string; src?: string }) {
+   if (!src) return null
    return (
-      <div className="my-6 w-full">
+      <div className="relative my-6 aspect-video w-full overflow-hidden rounded-lg">
          <Image
-            alt={alt}
-            className="mx-auto rounded-lg"
+            alt={alt || ''}
+            className="object-cover"
             src={src}
             fill
-            sizes="(min-width: 1000px) 30vw, 50vw"
+            sizes="(min-width: 1024px) 900px, 100vw"
          />
       </div>
    )

@@ -25,8 +25,6 @@ export function ContactForm({
    defaultSubject = '',
    compact = false,
 }: ContactFormProps) {
-   if (!isFeatureEnabled('contactMessages')) return null
-
    const copy = getFeedbackCopy()
    const [name, setName] = useState('')
    const [email, setEmail] = useState('')
@@ -72,6 +70,8 @@ export function ContactForm({
          setLoading(false)
       }
    }
+
+   if (!isFeatureEnabled('contactMessages')) return null
 
    return (
       <form

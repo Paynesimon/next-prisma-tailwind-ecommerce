@@ -6,6 +6,8 @@ import { getOptionalUserId } from '@/lib/request-auth'
 import { sendMail } from '@persepolis/mail'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 function isValidEmail(email: string) {
    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }

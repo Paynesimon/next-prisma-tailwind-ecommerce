@@ -137,3 +137,18 @@
       @apply px-4;
    }
 }
+
+/* RTL layout helpers (Arabic and future RTL locales) */
+[dir="rtl"] table th,
+[dir="rtl"] table td {
+   text-align: right;
+}
+
+[dir="rtl"] .prose {
+   text-align: right;
+}
+
+[dir="rtl"] input,
+[dir="rtl"] textarea {
+   text-align: right;
+}

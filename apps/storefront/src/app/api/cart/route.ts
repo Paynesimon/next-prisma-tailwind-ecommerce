@@ -2,6 +2,8 @@ import prisma from '@/lib/prisma'
 import { getProductMoq, isValidCartQuantity } from '@/lib/moq'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: Request) {
    try {
       const userId = req.headers.get('X-USER-ID')

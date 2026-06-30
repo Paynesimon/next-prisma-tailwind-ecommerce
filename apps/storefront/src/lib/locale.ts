@@ -1,3 +1,5 @@
+import { isRtlLocale, t } from '@/i18n'
+
 import { config } from './config'
 
 export interface LocaleConfig {
@@ -57,6 +59,10 @@ export function getHtmlLang(): string {
    return getLocale().language
 }
 
+export function isHtmlRtl(): boolean {
+   return isRtlLocale(getLocale().language)
+}
+
 export function getStripeCurrency(): string {
    return getLocale().currency.toLowerCase()
 }
@@ -78,19 +84,7 @@ export function formatMoney(amount: number): string {
 }
 
 export function formatSoldCount(count: number): string {
-   const lang = getLocale().language
-   const base = lang.split('-')[0]
-
-   const labels: Record<string, (n: number) => string> = {
-      en: (n) => `${n} sold`,
-      zh: (n) => `已售 ${n} 件`,
-      ja: (n) => `${n} 件販売`,
-      ko: (n) => `${n}개 판매`,
-      vi: (n) => `Đã bán ${n}`,
-   }
-
-   const fn = labels[lang] || labels[base] || labels.en
-   return fn(count)
+   return t('common.soldCount', { count })
 }
 
 export function toStripeUnitAmount(price: number): number {

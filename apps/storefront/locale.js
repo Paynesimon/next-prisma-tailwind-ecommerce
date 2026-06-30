@@ -49,6 +49,46 @@ const REGION_PRESETS = {
       defaultCurrency: 'JPY',
       defaultLanguage: 'ja',
    },
+   RU: {
+      neonRegion: 'aws-eu-central-1',
+      countryCode: 'RU',
+      taxRate: 0.2,
+      timezone: 'Europe/Moscow',
+      defaultCurrency: 'RUB',
+      defaultLanguage: 'ru',
+   },
+   LATAM: {
+      neonRegion: 'aws-us-east-1',
+      countryCode: 'BR',
+      taxRate: 0.17,
+      timezone: 'America/Sao_Paulo',
+      defaultCurrency: 'USD',
+      defaultLanguage: 'es',
+   },
+   ME: {
+      neonRegion: 'aws-eu-central-1',
+      countryCode: 'AE',
+      taxRate: 0.05,
+      timezone: 'Asia/Dubai',
+      defaultCurrency: 'USD',
+      defaultLanguage: 'ar',
+   },
+   AF: {
+      neonRegion: 'aws-eu-west-2',
+      countryCode: 'ZA',
+      taxRate: 0.15,
+      timezone: 'Africa/Johannesburg',
+      defaultCurrency: 'USD',
+      defaultLanguage: 'en',
+   },
+   CA: {
+      neonRegion: 'aws-eu-central-1',
+      countryCode: 'KZ',
+      taxRate: 0.12,
+      timezone: 'Asia/Almaty',
+      defaultCurrency: 'USD',
+      defaultLanguage: 'ru',
+   },
 }
 
 const LANGUAGE_ALIASES = {
@@ -76,6 +116,28 @@ const LANGUAGE_ALIASES = {
    es: 'es',
    spanish: 'es',
    西班牙语: 'es',
+   ru: 'ru',
+   russian: 'ru',
+   俄语: 'ru',
+   pt: 'pt',
+   'pt-br': 'pt',
+   portuguese: 'pt',
+   葡萄牙语: 'pt',
+   ar: 'ar',
+   arabic: 'ar',
+   阿拉伯语: 'ar',
+   th: 'th',
+   thai: 'th',
+   泰语: 'th',
+   vi: 'vi',
+   vietnamese: 'vi',
+   越南语: 'vi',
+   tr: 'tr',
+   turkish: 'tr',
+   土耳其语: 'tr',
+   id: 'id',
+   indonesian: 'id',
+   印尼语: 'id',
 }
 
 const AI_LANGUAGE_NAMES = {
@@ -87,6 +149,13 @@ const AI_LANGUAGE_NAMES = {
    ja: 'Japanese',
    ko: 'Korean',
    es: 'Spanish',
+   ru: 'Russian',
+   pt: 'Portuguese',
+   ar: 'Arabic',
+   th: 'Thai',
+   vi: 'Vietnamese',
+   tr: 'Turkish',
+   id: 'Indonesian',
 }
 
 const ZERO_DECIMAL_CURRENCIES = new Set(['JPY', 'KRW', 'VND'])
@@ -101,12 +170,20 @@ function normalizeRegion(value) {
    if (key === 'CHINA' || key === '中国') return 'CN'
    if (key === 'EUROPE' || key === '欧洲') return 'EU'
    if (key === 'SINGAPORE' || key === '东南亚') return 'SEA'
+   if (key === 'RUSSIA' || key === '俄罗斯' || key === '俄') return 'RU'
+   if (key === 'LATAM' || key === '南美' || key === '拉丁美洲') return 'LATAM'
+   if (key === 'MIDDLEEAST' || key === '中东') return 'ME'
+   if (key === 'AFRICA' || key === '非洲') return 'AF'
+   if (key === 'CENTRALASIA' || key === '中亚') return 'CA'
    return 'US'
 }
 
 function normalizeLanguage(value, fallback = 'en') {
    const raw = String(value || fallback).trim()
    const key = raw.toLowerCase()
+   if (key.startsWith('ar')) return 'ar'
+   if (key.startsWith('pt')) return 'pt'
+   if (key.startsWith('es')) return 'es'
    return LANGUAGE_ALIASES[key] || raw
 }
 

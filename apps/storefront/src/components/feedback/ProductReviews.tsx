@@ -29,8 +29,6 @@ export function ProductReviews({
    productId: string
    theme?: StorefrontTheme
 }) {
-   if (!isFeatureEnabled('productReviews')) return null
-
    const copy = getFeedbackCopy()
    const { authenticated } = useAuthenticated()
    const [reviews, setReviews] = useState<Review[]>([])
@@ -46,21 +44,38 @@ export function ProductReviews({
    const [loaded, setLoaded] = useState(false)
    const [message, setMessage] = useState('')
 
-   const load = useCallback(async () => {
-      const res = await fetch(`/api/reviews?productId=${productId}`, {
-         cache: 'no-store',
-         credentials: 'include',
-      })
-      const data = await res.json()
-      setReviews(data.reviews || [])
-      setAvg(data.avg || 0)
-      setCount(data.count || 0)
-      setEligibility(data.eligibility ?? null)
-      setLoaded(true)
+   const load = useCallback(async (signal?: AbortSignal) => {
+      try {
+         const res = await fetch(
+            `/api/reviews?productId=${encodeURIComponent(productId)}`,
+            {
+               cache: 'no-store',
+               credentials: 'include',
+               signal,
+            }
+         )
+
+         if (!res.ok) {
+            setLoaded(true)
+            return
+         }
+
+         const data = await res.json()
+         setReviews(data.reviews || [])
+         setAvg(data.avg || 0)
+         setCount(data.count || 0)
+         setEligibility(data.eligibility ?? null)
+         setLoaded(true)
+      } catch (error) {
+         if (error instanceof DOMException && error.name === 'AbortError') return
+         setLoaded(true)
+      }
    }, [productId])
 
    useEffect(() => {
-      load()
+      const controller = new AbortController()
+      load(controller.signal)
+      return () => controller.abort()
    }, [load, authenticated])
 
    async function onSubmit(e: React.FormEvent) {
@@ -72,6 +87,7 @@ export function ProductReviews({
          const res = await fetch('/api/reviews', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ productId, rating, text }),
          })
          const data = await res.json()
@@ -98,6 +114,8 @@ export function ProductReviews({
          setLoading(false)
       }
    }
+
+   if (!isFeatureEnabled('productReviews')) return null
 
    return (
       <section className={cn('mt-10 space-y-6', feedbackSectionClass(theme))}>
@@ -163,11 +181,7 @@ export function ProductReviews({
                <p className="text-sm text-muted-foreground">…</p>
             ) : eligibility?.hasReviewed ? (
                <p className="text-sm text-muted-foreground">{copy.reviewAlready}</p>
-            ) : eligibility?.canReview === false ? (
-               <p className="text-sm text-muted-foreground">
-                  {copy.reviewPurchaseRequired}
-               </p>
-            ) : (
+            ) : eligibility?.canReview ? (
                <form onSubmit={onSubmit} className="space-y-4">
                   <h3 className="font-medium">{copy.writeReview}</h3>
                   <div className="space-y-2">
@@ -191,6 +205,10 @@ export function ProductReviews({
                      <p className="text-sm text-muted-foreground">{message}</p>
                   ) : null}
                </form>
+            ) : (
+               <p className="text-sm text-muted-foreground">
+                  {copy.reviewPurchaseRequired}
+               </p>
             )}
          </div>
       </section>

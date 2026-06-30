@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma'
 import { getOptionalUserId } from '@/lib/request-auth'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 type RouteContext = { params: { slug: string } }
 
 export async function GET(_req: Request, { params }: RouteContext) {
