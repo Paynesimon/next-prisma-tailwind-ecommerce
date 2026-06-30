@@ -6,7 +6,30 @@
 //   node db-push-client.js --all          # 飞书店铺表全部客户ID
 
 const { execSync } = require('child_process')
+const fs = require('fs')
 const path = require('path')
+
+function loadEnvFile(filePath) {
+   if (!fs.existsSync(filePath)) return
+   for (const line of fs.readFileSync(filePath, 'utf8').split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const eq = trimmed.indexOf('=')
+      if (eq === -1) continue
+      const key = trimmed.slice(0, eq).trim()
+      let val = trimmed.slice(eq + 1).trim()
+      if (
+         (val.startsWith('"') && val.endsWith('"')) ||
+         (val.startsWith("'") && val.endsWith("'"))
+      ) {
+         val = val.slice(1, -1)
+      }
+      if (!process.env[key]) process.env[key] = val
+   }
+}
+
+loadEnvFile(path.join(__dirname, '.env'))
+loadEnvFile(path.join(__dirname, '.env.local'))
 
 const FEISHU_APP_ID = process.env.FEISHU_APP_ID || 'YOUR_FEISHU_APP_ID'
 const FEISHU_APP_SECRET = process.env.FEISHU_APP_SECRET || 'YOUR_FEISHU_APP_SECRET'
@@ -91,16 +114,17 @@ async function pushSchemaForClient(clientId, { includeAdmin = false } = {}) {
 async function main() {
    const args = process.argv.slice(2)
    const includeAdmin = args.includes('--admin')
+   const useAll = args.includes('--all')
    const clientIds = args.filter((a) => !a.startsWith('--'))
 
-   if (!clientIds.length) {
+   if (!useAll && !clientIds.length) {
       console.log('用法: node db-push-client.js [--admin] client001 [client002 ...]')
       console.log('      node db-push-client.js [--admin] --all')
       process.exit(1)
    }
 
    let targets = clientIds
-   if (clientIds.length === 1 && clientIds[0] === '--all') {
+   if (useAll) {
       targets = await getStoreClientIds()
       if (!targets.length) throw new Error('飞书店铺表未找到任何客户ID')
       log('📋', `共 ${targets.length} 个客户：${targets.join(', ')}`)
